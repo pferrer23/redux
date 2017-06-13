@@ -40,7 +40,6 @@ export function fetchingUserSuccess (uid, user, timestamp) {
   }
 }
 
-
 const initialUserState = {
   lastUpdated: 0,
   info: {
