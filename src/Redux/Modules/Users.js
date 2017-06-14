@@ -1,3 +1,6 @@
+import Auth,{ logout, saveUser } from '../../Utils/Auth';
+import { formatUserInfo } from '../../Utils/Utils';
+
 const AUTH_USER = 'AUTH_USER'
 const UNAUTH_USER = 'UNAUTH_USER'
 const FETCHING_USER = 'FETCHING_USER'
@@ -17,13 +20,13 @@ function unauthUser () {
   }
 }
 
-export function fetchingUser () {
+function fetchingUser () {
   return {
     type: FETCHING_USER,
   }
 }
 
-export function fetchingUserFailure (error) {
+function fetchingUserFailure (error) {
   console.warn(error)
   return {
     type: FETCHING_USER_FAILURE,
@@ -37,6 +40,31 @@ export function fetchingUserSuccess (uid, user, timestamp) {
     uid,
     user,
     timestamp,
+  }
+}
+
+export function fetchAndHandleAuthUser () {
+  return function (dispatch) {
+    dispatch(fetchingUser());
+    return Auth()
+    .then(({user, credential}) => {
+      console.log('user', user)
+      const userData = user.providerData[0];
+      const userInfo = formatUserInfo(userData.displayName, userData.photoURL, user.uid);
+      return dispatch(fetchingUserSuccess(user.uid, userInfo, Date.now()));
+    })
+    .then(({user}) => saveUser(user))
+    .then((user) => {
+     return dispatch(authUser(user.uid));
+    })
+    .catch((error) => dispatch(fetchingUserFailure(error)));
+  }
+}
+
+export function logoutAndUnauth () {
+  return function (dispatch) {
+    logout();
+    dispatch(unauthUser());
   }
 }
 

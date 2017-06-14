@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import Authenticate from '../Components/Authenticate';
-import Auth from '../Utils/Auth';
+
 import * as userActionCreators from '../Redux/Modules/Users';
 
 
@@ -12,13 +12,10 @@ class AuthenticateView extends Component {
     super(props);
     this.handleAuth = this.handleAuth.bind(this);
   }
-  handleAuth () {
-    this.props.fetchingUser()
-    Auth().then((user) => {
-      this.props.fetchingUserSuccess(user.uid, user, Date.now())
-      this.props.authUser(user.uid)
-    })
-    .catch((error) => this.props.fetchingUserFailure(error))
+  handleAuth (e) {
+    e.preventDefault();
+    this.props.fetchAndHandleAuthUser()
+    .then(() => { this.context.router.history.replace('feed'); });
   }
   render() {
     return (
@@ -31,13 +28,14 @@ class AuthenticateView extends Component {
 }
 
 AuthenticateView.propTypes = {
-  fetchingUser: PropTypes.func.isRequired,
-  fetchingUserFailure: PropTypes.func.isRequired,
-  fetchingUserSuccess: PropTypes.func.isRequired,
+  fetchAndHandleAuthUser: PropTypes.func.isRequired,
   isFetching: PropTypes.bool.isRequired,
   error: PropTypes.string.isRequired,
 };
 
+AuthenticateView.contextTypes = {
+  router: PropTypes.object.isRequired,
+};
 
 export default connect(
   (state) => ({isFetching: state.isFetching, error: state.error}),

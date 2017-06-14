@@ -1,13 +1,20 @@
-const auth = () => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve({
-        name: 'Pablo Ferrer',
-        avatar: 'https://media.licdn.com/mpr/mpr/shrinknp_200_200/AAEAAQAAAAAAAAbVAAAAJDY3YzRiMTM3LTIwNGUtNGY1ZC05NDMxLTExMTA0YjE4NTdlZA.jpg',
-        uid: 'pferrer23',
-      })
-    } ,2000);
-  });
+import firebase from 'firebase';
+import {ref, firebaseAuth } from '../Config/Constants';
+
+export default  function auth () {
+  return firebaseAuth().signInWithPopup(new firebase.auth.FacebookAuthProvider())
 };
 
-export default auth;
+export function checkIfAuthed (store) {
+  return store.getState().isAuthed
+}
+
+export function logout () {
+  firebaseAuth().signOut();
+}
+
+export function saveUser (user) {
+  return ref.child(`users/${user.uid}`)
+  .set(user)
+  .then(() => user);
+}
